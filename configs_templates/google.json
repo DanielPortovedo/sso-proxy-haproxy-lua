@@ -1,0 +1,36 @@
+{   
+    "global": {
+        "root_uri": "http://localhost:4180",
+        "public_uris": ["/public"],
+        "debug_mode_enabled": true
+    },
+    "web_apps":{
+        "/" : {
+            "home_page_uri": "/",
+            "error_page_uri": "/error",
+            "callback_uri": "/callback",
+            "logout_uri": "/logout",
+            "scope": ["profile","email","openid"],
+            "require_authentication": true,
+            "session_cookie_name": "ha-sessionID", 
+            "session_validity": 3600
+        },
+        "/api" : {
+            "home_page_uri": "/api",
+            "error_page_uri": "/error",
+            "callback_uri": "/callback",
+            "logout_uri": "/logout",
+            "scope": ["openid"]
+        }
+    },
+    "provider": {
+        "name": "google",
+        "client_id":"client_id",
+        "project_id":"project_id",
+        "auth_uri":"https://accounts.google.com/o/oauth2/auth",
+        "token_uri":"https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret":"client_secret",
+        "redirect_uris":["https://redirect_uri/callback"]
+    }
+}

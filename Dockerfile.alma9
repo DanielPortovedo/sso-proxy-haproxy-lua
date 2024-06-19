@@ -1,0 +1,37 @@
+FROM docker.io/library/almalinux:latest
+
+ENV LUA_VERSION 5.4.6
+ENV LUAROCKS_VERSION 3.11.1
+
+# Upgrade dnf and install extra repos
+RUN dnf -y upgrade && dnf -y install epel-release
+
+# Install HAProxy and build dependencies
+RUN dnf -y install haproxy gcc openssl unzip
+
+# Install Lua
+RUN curl -L -R -O https://www.lua.org/ftp/lua-${LUA_VERSION}.tar.gz && \
+    tar zxf lua-${LUA_VERSION}.tar.gz && rm -r lua-${LUA_VERSION}.tar.gz && \
+    cd lua-${LUA_VERSION} && \
+    make linux && \
+    make install test
+
+# Install Lua dependencies
+RUN dnf -y install lua-socket lua-sec lua-luaossl 
+
+RUN dnf clean all
+
+# Install luarocks - Lua package manager
+RUN curl -R -O http://luarocks.github.io/luarocks/releases/luarocks-${LUAROCKS_VERSION}.tar.gz && \
+    tar -zxf luarocks-${LUAROCKS_VERSION}.tar.gz && rm -r luarocks-${LUAROCKS_VERSION}.tar.gz && \
+    cd luarocks-${LUAROCKS_VERSION} && \
+    ./configure --with-lua-include=/usr/local/include && \
+    make && \
+    make install 
+
+# More lua dependencies
+RUN luarocks install lunajson --tree=/usr/
+
+COPY . /etc/haproxy/
+
+WORKDIR /etc/haproxy
