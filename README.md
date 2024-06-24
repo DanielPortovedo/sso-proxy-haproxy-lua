@@ -44,7 +44,10 @@ Example:
 - `scope`: Scopes of the OIDC protocol. Is a **mandatory array of strings**.
 - `headers_to_be_removed`: Headers that the proxy will remove from the request not allowing them to reach the backend. Is a **not mandatory array of strings** with default being an empty array. 
 - `require_authentication`: Defines if the current web application requires or not authentication. If set to **false** all the requests are not required to be authenticated. In this case, the `header_to_be_removed` feature is still applied. Is **a mandatory boolean**.
-- `session_cookie_name`: Name of the session cookie. Is a **not mandatory string** with default value `ha-session-id` concatenated with context path without the initial /. For instance `ha-session-id-api` for `/api` and `ha-session-id-` for `/`.
+- `session_cookie_name`: Name of the session cookie. Is a **not mandatory string** with default value `ha-session-id-` concatenated with context path without the initial /. For instance `ha-session-id-api` for `/api` and `ha-session-id-` for `/`.
+- `session_cookie_httponly`: HttpOnly session cookie property. Is a **not mandatory boolean** with default value **true**.
+- `session_cookie_secure`: Secure session cookie property. Is a **not mandatory boolean** with default value **true**.
+- `session_cookie_samesite`: SameSite session cookie property. Is a **not mandatory string** with default value **Lax**. Possible values are **None**, **Lax** and **Strict**. More information can be seen [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value).
 - `session_validity`: The validity of the session and the cookie. Is a **not mandatory integer** with default value 3600. Attention this value shall be treated as **seconds**.
 
 Example:
@@ -60,6 +63,9 @@ Example:
         "headers_to_be_removed": ["SAFE_HEADER"],
         "require_authentication": true,
         "session_cookie_name": "ha-sessionID", 
+        "session_cookie_httponly": true,
+        "session_cookie_secure": true,
+        "session_cookie_samesite": "Lax",
         "session_validity": 3600
     },
     "/api" : {
