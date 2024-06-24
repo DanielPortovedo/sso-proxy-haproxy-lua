@@ -24,7 +24,7 @@ The configurations are divided into 3 different sections:
 
 #### global
 - `root_uri`: Defines the base uri of your application. Is a **mandatory string**.
-- `public_uris`: Defines public endpoints that the proxy will ignore. This implies that no manipulation is going to be made to the request. Is a **mandatory list of strings**. 
+- `public_uris`: Defines public endpoints that the proxy will ignore. This implies that no manipulation is going to be made to the request. Is a **not mandatory array of strings** with default being an empty array.
 - `debug_mode_enabled`: Enables or disables the `/sso-proxy/debug` endpoints that dumps debugging information, and enables or disables the dump that also happens in the logs of the application when you add a specific header to the request (this implementation is not yet implemented). Is a **mandatory boolean**.
 
 Example:
