@@ -81,6 +81,9 @@ local function validate_applications_configurations()
         wa_confs[c]["headers_to_be_removed"] = utils.validate_type("headers_to_be_removed", wa_confs[c]["headers_to_be_removed"], "table", {})
         wa_confs[c]["require_authentication"] = utils.validate_type("require_authentication", wa_confs[c]["require_authentication"], "boolean", true)
         wa_confs[c]["session_cookie_name"] = utils.validate_type("session_cookie_name", wa_confs[c]["session_cookie_name"], "string", "ha-session-id" .. wa_confs[c]["callback_uri"]:gsub("/", "-"))
+        wa_confs[c]["session_cookie_httponly"] = utils.validate_type("session_cookie_httponly", wa_confs[c]["session_cookie_httponly"], "boolean", true)
+        wa_confs[c]["session_cookie_secure"] = utils.validate_type("session_cookie_secure", wa_confs[c]["session_cookie_secure"], "boolean", true)
+        wa_confs[c]["session_cookie_samesite"] = utils.validate_type("session_cookie_samesite", wa_confs[c]["session_cookie_samesite"], "string", "Lax")
         wa_confs[c]["session_validity"] = utils.validate_type("session_validity", wa_confs[c]["session_validity"], "number", 3600)
     end
 
@@ -200,11 +203,19 @@ local function callback(applet)
         end
 
         -- Redirect user to previous request before starting authentication and add cookie session
-        applet:add_header("Set-Cookie", confs["web_apps"][current_context]["session_cookie_name"] .. "=" .. session_id ..
-        ";HttpOnly=true" ..
-        ";secure=true" ..
-        ";SameSite=Lax" ..
-        ";Path=" .. current_context)
+        local set_cookie = confs["web_apps"][current_context]["session_cookie_name"] .. "=" .. session_id ..
+        "; SameSite=" .. confs["web_apps"][current_context]["session_cookie_samesite"] ..
+        "; Path=" .. current_context
+
+        if confs["web_apps"][current_context]["session_cookie_httponly"] then
+            set_cookie = set_cookie .. "; HttpOnly"
+        end
+
+        if confs["web_apps"][current_context]["session_cookie_secure"] then
+            set_cookie = set_cookie .. "; Secure"
+        end
+
+        applet:add_header("Set-Cookie", set_cookie)
 
         applet:set_status(302)
         applet:add_header("Location", redirect_uri)

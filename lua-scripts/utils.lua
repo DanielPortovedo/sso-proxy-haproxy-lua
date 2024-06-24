@@ -352,7 +352,7 @@ end
 ---@param default_value any Default value
 ---@return any #Any
 function utils.validate_type(key, value, value_type, default_value)
-    if value then
+    if value ~= nil then
         if type(value) == value_type then
             return value
         else
