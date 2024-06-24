@@ -360,7 +360,7 @@ function utils.validate_type(key, value, value_type, default_value)
             "' . Is expected '" .. value_type .. "' and got '" .. type(value) .. "'")
         end
     else
-        if default_value then
+        if default_value ~= nil then
             return default_value
         else
             error.throw_error_and_exit("Value for the key '" .. key .. "' was not found")

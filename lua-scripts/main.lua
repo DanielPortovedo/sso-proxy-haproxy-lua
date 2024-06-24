@@ -51,7 +51,7 @@ local function validate_global_configurations()
     -- Validate types and replace with defaults if needed
     s_confs["root_uri"] = utils.validate_type("root_uri", s_confs["root_uri"], "string")
     s_confs["public_uris"] = utils.validate_type("public_uris", s_confs["public_uris"], "table", {})
-    s_confs["debug_mode_enabled"] = utils.validate_type("debug_mode_enabled", s_confs["debug_mode_enabled"], "boolean")
+    s_confs["debug_mode_enabled"] = utils.validate_type("debug_mode_enabled", s_confs["debug_mode_enabled"], "boolean", false)
 
     -- Ensure that root_uri doesn't end with /
     if utils.is_last_char_equal(s_confs["root_uri"], "/") then
