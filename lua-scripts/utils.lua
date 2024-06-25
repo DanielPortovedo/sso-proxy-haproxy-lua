@@ -273,7 +273,10 @@ function utils.extract_parameters(uri)
 end
 
 local function b64_decode(string)
-    return (mime.unb64(string .. string.rep('=', 3 - ((#string - 1) % 4))))
+    -- replace - and _
+    local b64_formated_string = string:gsub('[-]', '+'):gsub('[_]', '/')
+
+    return (mime.unb64(b64_formated_string .. b64_formated_string.rep('=', 3 - ((#b64_formated_string - 1) % 4))))
 end
 
 ---Decodes a Json Web Token (jwt)
