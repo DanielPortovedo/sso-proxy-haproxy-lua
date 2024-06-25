@@ -273,7 +273,10 @@ function utils.extract_parameters(uri)
 end
 
 local function b64_decode(string)
-    return (mime.unb64(string .. string.rep('=', 3 - ((#string - 1) % 4))))
+    -- replace - and _
+    local b64_formated_string = string:gsub('[-]', '+'):gsub('[_]', '/')
+
+    return (mime.unb64(b64_formated_string .. b64_formated_string.rep('=', 3 - ((#b64_formated_string - 1) % 4))))
 end
 
 ---Decodes a Json Web Token (jwt)
@@ -352,7 +355,7 @@ end
 ---@param default_value any Default value
 ---@return any #Any
 function utils.validate_type(key, value, value_type, default_value)
-    if value ~= nil then
+    if value then
         if type(value) == value_type then
             return value
         else
@@ -360,7 +363,7 @@ function utils.validate_type(key, value, value_type, default_value)
             "' . Is expected '" .. value_type .. "' and got '" .. type(value) .. "'")
         end
     else
-        if default_value ~= nil then
+        if default_value then
             return default_value
         else
             error.throw_error_and_exit("Value for the key '" .. key .. "' was not found")
