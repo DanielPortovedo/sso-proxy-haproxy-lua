@@ -169,6 +169,7 @@ end
 ---@param token any JWT token
 ---@param public_key string Public key as string
 ---@return boolean #True - Valid | False - Not Valid
+--- Adapted from: https://github.com/haproxytech/haproxy-lua-oauth/blob/master/lib/jwtverify.lua
 function utils.rs256_signature_is_valid(token, public_key)
     local digest = openssl.digest.new('SHA256')
     digest:update(token.header .. '.' .. token.payload)
@@ -192,6 +193,7 @@ end
 ---@param aud string|table String or table coming from decoded jwt
 ---@param expected_audience_param string Coming from the configuration file
 ---@return boolean #True - Audience match | False - Audience dont match
+--- Adapted from: https://github.com/haproxytech/haproxy-lua-oauth/blob/master/lib/jwtverify.lua
 function utils.audience_is_valid(aud, expected_audience_param)
     -- Validate if incoming audience is string and if it is simply compare it
     if(type(aud) == "string") then
@@ -281,7 +283,8 @@ end
 
 ---Decodes a Json Web Token (jwt)
 ---@param jwt string JWT with 3 sections **{header | payload | signature}** separated by a dot '.'
----@return any|nil #Decoded token with type object that contains **{headerdecoded | payloaddecoded | signaturedecoded}**. Or nil in case JWT is improperly formated. 
+---@return any|nil #Decoded token with type object that contains **{headerdecoded | payloaddecoded | signaturedecoded}**. Or nil in case JWT is improperly formated.
+--- Adapted from: https://github.com/haproxytech/haproxy-lua-oauth/blob/master/lib/jwtverify.lua
 function utils.decode_jwt(jwt, applet, redirect_uri)
     local header_fields = core.tokenize(jwt, ".")
 
@@ -372,7 +375,7 @@ function utils.validate_type(key, value, value_type, default_value)
 end
 
 -- This function is used to drop cookies so they are not sent to the backend
-function utils.drop_cookies(txn)
+function utils.drop_cookies(txn, confs_webapp)
     -- Extract cookie from request
     local cookie = txn.http:req_get_headers()["cookie"]
 
@@ -384,12 +387,21 @@ function utils.drop_cookies(txn)
         return nil
     end
 
-    -- Cookies to be dropped
-    local protected_cookie_keys = {constants.sso_proxy_username, constants.sso_proxy_email}
+    -- Extract protected cookie keys
+    local protected_cookie_keys = {}
+    for _,custom_cookie in pairs(confs_webapp["custom_cookies"]) do
+        local cookie_key = custom_cookie["cookie_name"]
+
+        if cookie_key == nil then
+            cookie_key = "ha_proxy_" .. custom_cookie["claim_name"]
+        end
+
+        table.insert(protected_cookie_keys, cookie_key)
+    end
 
     -- Remove cookies from the dictionary
-    for k,_ in pairs(protected_cookie_keys) do
-        cookie_dict[k] = nil
+    for _,v in pairs(protected_cookie_keys) do
+        cookie_dict[v] = nil
     end
 
     -- Rebuild cookie
@@ -404,7 +416,7 @@ function utils.drop_cookies(txn)
 end
 
 -- Add cookies to the request
-function utils.add_cookies(txn, user_info)
+function utils.add_cookies(txn, user_info, confs_webapp)
     -- Extract cookie from request
     local cookie = txn.http:req_get_headers()["cookie"]
 
@@ -416,10 +428,20 @@ function utils.add_cookies(txn, user_info)
         return nil
     end
 
-    local cookies_to_add = {
-        [constants.sso_proxy_username] = user_info["name"],
-        [constants.sso_proxy_email] = user_info["email"],
-    }
+    -- load cookies to be added to the request
+    local cookies_to_add = {}
+    for _,custom_cookie in pairs(confs_webapp["custom_cookies"]) do
+        local cookie_key = custom_cookie["cookie_name"]
+        local cookie_value = user_info[custom_cookie["claim_name"]]
+
+        if cookie_key == nil then
+            cookie_key = "HA_PROXY_" .. custom_cookie["claim_name"]
+        end
+
+        if cookie_value ~= nil then
+            cookies_to_add[cookie_key] = cookie_value
+        end
+    end
 
     -- Add cookies to dict
     for k,v in pairs(cookies_to_add) do

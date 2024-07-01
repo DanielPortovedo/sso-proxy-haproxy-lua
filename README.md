@@ -49,6 +49,7 @@ Example:
 - `session_cookie_secure`: Secure session cookie property. Is a **not mandatory boolean** with default value **true**.
 - `session_cookie_samesite`: SameSite session cookie property. Is a **not mandatory string** with default value **Lax**. Possible values are **None**, **Lax** and **Strict**. More information can be seen [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value).
 - `session_validity`: The validity of the session and the cookie. Is a **not mandatory integer** with default value 3600. Attention this value shall be treated as **seconds**.
+- `custom_cookies`: It's an array of json objects that each contain a `claim_name`, which must match the name of a claim in the `id_token` (**mandatory**), and `cookie_name`, which is the name of the cookie that will contain the value of the corresponding claim (**not mandatory** with default value being *ha_proxy_* + *claim_name*. Example for claim_name = name : *ha_proxy_name*)
 
 Example:
 
@@ -66,7 +67,16 @@ Example:
         "session_cookie_httponly": true,
         "session_cookie_secure": true,
         "session_cookie_samesite": "Lax",
-        "session_validity": 3600
+        "session_validity": 3600,
+        "custom_cookies": [
+            {
+                "claim_name": "name"
+            },
+            {
+                "cookie_name": "proxy_email",
+                "claim_name": "email"
+            }
+        ]
     },
     "/api" : {
         "home_page_uri": "/api",

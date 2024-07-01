@@ -13,7 +13,17 @@
             "scope": ["profile","email","openid"],
             "require_authentication": true,
             "session_cookie_name": "ha-sessionID", 
-            "session_validity": 3600
+            "session_validity": 3600,
+            "custom_cookies": [
+                {
+                    "cookie_name": "proxy_name",
+                    "claim_name": "name"
+                },
+                {
+                    "cookie_name": "proxy_email",
+                    "claim_name": "email"
+                }
+            ]
         },
         "/api" : {
             "home_page_uri": "/api",
@@ -25,11 +35,12 @@
     },
     "provider": {
         "name": "google",
+        "issuer": "https://accounts.google.com",
         "client_id":"client_id",
         "project_id":"project_id",
         "auth_uri":"https://accounts.google.com/o/oauth2/auth",
         "token_uri":"https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+        "public_key_uri":"https://www.googleapis.com/oauth2/v1/certs",
         "client_secret":"client_secret",
         "redirect_uris":["https://redirect_uri/callback"]
     }
