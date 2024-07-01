@@ -112,7 +112,7 @@ function Google.get_tokens(current_context, global, web_app, code)
     return response_code, response_body
 end
 
-function Google.populate_session(session_validity, confs_provider, json_body)
+function Google.populate_session(session_validity, confs_provider, json_body, confs_webapp, current_context)
     local decoded_id_token
 
     local session = {
@@ -122,14 +122,27 @@ function Google.populate_session(session_validity, confs_provider, json_body)
 
     -- Validate id_token
     if json_body["id_token"] then
+        session["id_token"] = json_body["id_token"]
+
         decoded_id_token = utils.validate_jwt_token(json_body["id_token"], confs_provider)["payloaddecoded"]
 
         if not decoded_id_token then
             return false
         end
 
-        session["name"] = decoded_id_token["name"]
-        session["email"] = decoded_id_token["email"]
+        -- Save all claim names for cookies
+        -- Loop through custom cookies
+        for _,custom_cookie in pairs(confs_webapp["custom_cookies"]) do
+            -- Extract claim
+            local val = decoded_id_token[custom_cookie["claim_name"]]
+
+            -- If claim exists, store it
+            if val ~= nil then
+                session[custom_cookie["claim_name"]] = val
+            else
+                log.log_warning("Claim '" .. custom_cookie["claim_name"] .. "' not found in id_token while populating user session", "Google.populate_session", current_context)
+            end
+        end
     end
 
     return session

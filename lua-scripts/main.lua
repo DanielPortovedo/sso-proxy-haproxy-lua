@@ -1,3 +1,5 @@
+package.path = package.path .. ";/usr/share/lua/lua5.4/?.so" .. ";/usr/local/share/lua/5.4/?.lua"
+
 local utils = require("lua-scripts.utils")
 local log = require("lua-scripts.logs")
 local error = require("lua-scripts.errors")
@@ -85,6 +87,7 @@ local function validate_applications_configurations()
         wa_confs[c]["session_cookie_secure"] = utils.validate_type("session_cookie_secure", wa_confs[c]["session_cookie_secure"], "boolean", true)
         wa_confs[c]["session_cookie_samesite"] = utils.validate_type("session_cookie_samesite", wa_confs[c]["session_cookie_samesite"], "string", "Lax")
         wa_confs[c]["session_validity"] = utils.validate_type("session_validity", wa_confs[c]["session_validity"], "number", 3600)
+        wa_confs[c]["custom_cookies"] = utils.validate_type("custom_cookies", wa_confs[c]["custom_cookies"], "table", {})
     end
 
     confs["web_apps"] = wa_confs
@@ -195,7 +198,9 @@ local function callback(applet)
         local session_id = utils.generate_session_id(32)
 
         -- Populate session with user information
-        user_sessions[session_id] = provider.populate_session(confs["web_apps"][current_context]["session_validity"], confs["provider"], json_body)
+        user_sessions[session_id] = provider.populate_session(
+            confs["web_apps"][current_context]["session_validity"], confs["provider"], json_body, confs["web_apps"][current_context], current_context
+        )
 
         if not user_sessions[session_id] then
             error.throw_applet_error_redirect("Failed populating user session", applet, confs["web_apps"][current_context]["error_page_uri"])
@@ -276,8 +281,8 @@ local function validate_cookie(txn)
     log.log_info("Token validated", current_context)
 
     -- Add/sanitize cookies/headers for the request
-    utils.drop_cookies(txn)
-    utils.add_cookies(txn, user_info)
+    utils.drop_cookies(txn, confs["web_apps"][current_context])
+    utils.add_cookies(txn, user_info, confs["web_apps"][current_context])
     utils.add_headers(txn, user_info)
 
     -- Dump request information into logs
