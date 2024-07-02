@@ -88,6 +88,7 @@ local function validate_applications_configurations()
         wa_confs[c]["session_cookie_samesite"] = utils.validate_type("session_cookie_samesite", wa_confs[c]["session_cookie_samesite"], "string", "Lax")
         wa_confs[c]["session_validity"] = utils.validate_type("session_validity", wa_confs[c]["session_validity"], "number", 3600)
         wa_confs[c]["custom_cookies"] = utils.validate_type("custom_cookies", wa_confs[c]["custom_cookies"], "table", {})
+        wa_confs[c]["custom_headers"] = utils.validate_type("custom_headers", wa_confs[c]["custom_headers"], "table", {})
     end
 
     confs["web_apps"] = wa_confs
@@ -283,7 +284,7 @@ local function validate_cookie(txn)
     -- Add/sanitize cookies/headers for the request
     utils.drop_cookies(txn, confs["web_apps"][current_context])
     utils.add_cookies(txn, user_info, confs["web_apps"][current_context])
-    utils.add_headers(txn, user_info)
+    utils.add_headers(txn, user_info, confs["web_apps"][current_context])
 
     -- Dump request information into logs
     --[[ if confs["global"]["debug_mode_enabled"] then

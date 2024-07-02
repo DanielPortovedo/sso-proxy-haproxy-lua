@@ -50,9 +50,9 @@ Example:
 - `session_cookie_samesite`: SameSite session cookie property. Is a **not mandatory string** with default value **Lax**. Possible values are **None**, **Lax** and **Strict**. More information can be seen [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value).
 - `session_validity`: The validity of the session and the cookie. Is a **not mandatory integer** with default value 3600. Attention this value shall be treated as **seconds**.
 - `custom_cookies`: It's an array of json objects that each contain a `claim_name`, which must match the name of a claim in the `id_token` (**mandatory**), and `cookie_name`, which is the name of the cookie that will contain the value of the corresponding claim (**not mandatory** with default value being *ha_proxy_* + *claim_name*. Example for claim_name = name : *ha_proxy_name*)
+- `custom_headers`: It's an array of json objects that each contain a `claim_name`, which must match the name of a claim in the `id_token` (**mandatory**), and `header_name`, which is the name of the header that will contain the value of the corresponding claim (**not mandatory** with default value being *x_ha_proxy_* + *claim_name*. Example for claim_name = name : *x_ha_proxy_name*)
 
 Example:
-
 ```json
 "web_apps":{
     "/" : {
@@ -74,6 +74,15 @@ Example:
             },
             {
                 "cookie_name": "proxy_email",
+                "claim_name": "email"
+            }
+        ],
+        "custom_headers": [
+            {
+                "claim_name": "name"
+            },
+            {
+                "header_name": "x_proxy_email",
                 "claim_name": "email"
             }
         ]

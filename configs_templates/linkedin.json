@@ -24,6 +24,15 @@
                     "cookie_name": "proxy_email",
                     "claim_name": "email"
                 }
+            ],
+            "custom_headers": [
+                {
+                    "claim_name": "name"
+                },
+                {
+                    "header_name": "x_proxy_email",
+                    "claim_name": "email"
+                }
             ]
         },
         "/api" : {

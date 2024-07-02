@@ -460,11 +460,24 @@ function utils.add_cookies(txn, user_info, confs_webapp)
 end
 
 -- Add headers to the request
-function utils.add_headers(txn, user_info)
-    local headers_to_add = {
-        ["x-proxy-haproxy-username"] = user_info["name"],
-        ["x-proxy-haproxy-email"] = user_info["email"]
-    }
+function utils.add_headers(txn, user_info, confs_webapp)
+    -- load headers to be added to the request
+    local headers_to_add = {}
+    for _,custom_header in pairs(confs_webapp["custom_headers"]) do
+        local header_key = custom_header["header_name"]
+        local header_value = user_info[custom_header["claim_name"]]
+
+        if header_key == nil then
+            header_key = "x_ha_proxy_" .. custom_header["claim_name"]
+        end
+
+        -- if value exists add it to be added to the request
+        if header_value ~= nil then
+            headers_to_add[header_key] = header_value
+        else -- ensure that header is not forwarded to the backend
+            txn.http:req_del_header(header_key)
+        end
+    end
 
     -- Add headers to request
     for k,v in pairs(headers_to_add) do
