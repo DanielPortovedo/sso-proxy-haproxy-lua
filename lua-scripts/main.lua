@@ -135,7 +135,7 @@ local function init()
 
     --TODO: finish debug
     if confs["global"]["debug_mode_enabled"] then
-        debug.initialize_debug({})
+        debug.initialize_debug()
     end
 
     log.log_info("Current application paths are:" ..  utils.dump_table(contextsApplicationsPaths))
@@ -206,6 +206,11 @@ local function callback(applet)
         if not user_sessions[session_id] then
             error.throw_applet_error_redirect("Failed populating user session", applet, confs["web_apps"][current_context]["error_page_uri"])
             return
+        end
+
+        if confs["global"]["debug_mode_enabled"] then
+            debug.remove_user_session(1)
+            debug.add_user_authenticated_session(1)
         end
 
         -- Redirect user to previous request before starting authentication and add cookie session
@@ -281,6 +286,11 @@ local function validate_cookie(txn)
 
     log.log_info("Token validated", current_context)
 
+    -- Store all headers sent from the browser for debug purposes
+    if(confs["global"]["debug_mode_enabled"]) then
+        txn:set_priv(txn.http:req_get_headers()) -- use set_priv to be able to store table data type
+    end
+
     -- Add/sanitize cookies/headers for the request
     utils.drop_cookies(txn, confs["web_apps"][current_context])
     utils.add_cookies(txn, user_info, confs["web_apps"][current_context])
@@ -337,6 +347,10 @@ local function logout(applet)
 
     user_sessions[session_id] = nil
 
+    if confs["global"]["debug_mode_enabled"] then
+        debug.remove_user_authenticated_session(1)
+    end
+
     log.log_info("Redirecting user to SSO to be logged out", current_context)
 
     applet:set_status(302)
@@ -371,6 +385,10 @@ local function auth_redirect(applet)
         persist_request = persist_request_str
     }
 
+    if confs["global"]["debug_mode_enabled"] then
+        debug.add_user_session(1)
+    end
+
     provider.auth(current_context, confs["global"], confs["web_apps"][current_context], applet, session_id)
 end
 
@@ -396,6 +414,60 @@ local function remove_headers(txn)
     end
 end
 
+--- This function will retrieve the user information given the current request.
+--- It extracts the cookies and validates if the user session exists and it's valid
+local function extract_user_info_from_txn(txn)
+    current_context = txn:get_var("txn.context")
+
+    if current_context == nil then
+        error.throw_txn_error("Current context not found while extracting user_info", txn)
+        return nil
+    end
+
+    -- Extract cookie
+    local cookie_raw = txn.http:req_get_headers()["cookie"]
+
+    -- Cookie not found user will be redirected to obtain one
+    if(cookie_raw == nil) then
+        error.throw_txn_error("Cookie not found while extracting user_info", txn)
+        return nil
+    end
+
+    -- Parse cookie string to a dictionary
+    local cookie_dict = utils.cookie_to_dict(cookie_raw[0])
+
+    -- If error while parsing cookie to dict
+    if(cookie_dict == nil) then
+        error.throw_txn_error("Failed to parse cookie into dictionary while extracting user_info", txn)
+        return nil
+    end
+
+    -- Extract cookie authorization value
+    local session_id = cookie_dict[confs["web_apps"][current_context]["session_cookie_name"]]
+
+    -- Validate if Authorization cookie exists
+    if(session_id == nil) then
+        error.throw_txn_error("Session cookie not found while extracting user_info", txn)
+        return nil
+    end
+
+    -- Extract user info from lua memory
+    return user_sessions[session_id]
+end
+
+local function _debug(txn)
+    if confs["global"]["debug_mode_enabled"] then
+        local user_info = extract_user_info_from_txn(txn)
+
+        if not user_info then
+            error.throw_txn_error("Failed dumping debugging information because couldn't extract user_info", txn)
+            return
+        end
+
+        debug.dump(txn, user_info)
+    end
+end
+
 core.register_init(init)
 core.register_action("extract_uris", {"http-req"}, extract_uris)
 core.register_action("is_public_path", {"http-req"}, is_public_path)
@@ -405,4 +477,4 @@ core.register_action("validate_cookie", {"http-req"}, validate_cookie)
 core.register_service("logout", "http", logout)
 core.register_service("auth_redirect", "http", auth_redirect)
 core.register_action("remove_headers", {"http-req"}, remove_headers)
-core.register_action("debug", {"http-req"}, debug.dump)
+core.register_action("debug", {"http-req"}, _debug)
