@@ -8,7 +8,7 @@ This project demonstrates how to build a SSO Proxy based on HAproxy and using Lu
 
 This project, is in use by CERN to support java critical applications that require specific use cases and protection via SSO Proxy using OIDC authentication protocol.
 
-In this project, we use different providers to show that it can be built for any OIDC provider. It also adds the username and the email, from the information provided by the provider, to the request as cookies (**sso_proxy_username**, **sso_proxy_email**) and headers (**x-proxy-haproxy-username**, **x-proxy-haproxy-email**). A debug page it's also available at `/sso-proxy/debug` that dumps the information of the request before send it to the backend. Finally, it can also support multiple applications behinde the proxy with different contexts.
+In this project, we use different providers to show that it can be built for any OIDC provider. The configurations also allows it to add whatever information from the `id_token` claims to the request to the backend (see **custom_headers** and **custom_cookies** configurations). A debug page it's also available at `/sso-proxy/debug` that dumps the current information from the incoming request, and outgoing request, users informations and user session details; this is usefull to check what the proxy is receiving and sending to the backend. Finally, it can also support multiple applications behind the proxy with different contexts.
 
 ## How to use
 First you must choose your provider, from the so far supported ones which are either `google` or `linkedin`, and create an registration for your application. You can get more information to do this using Google Provider in `docs/google.md`, or for Linkedin.md in `docs/linkedin.md`.
