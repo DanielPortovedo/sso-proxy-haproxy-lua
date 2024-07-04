@@ -37,10 +37,9 @@
         },
         "/api" : {
             "home_page_uri": "/api",
-            "error_page_uri": "/error",
+            "error_page_uri": "/api/error",
             "callback_uri": "/api/callback",
             "logout_uri": "/api/logout",
-            "session_cookie_name": "ha-session-id-api", 
             "scope": ["openid"]
         }
     },
