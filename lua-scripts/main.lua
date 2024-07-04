@@ -226,6 +226,10 @@ local function callback(applet)
             set_cookie = set_cookie .. "; Secure"
         end
 
+        if confs["web_apps"][current_context]["session_validity"] then
+            set_cookie = set_cookie .. "; Expires=" .. os.date('!%a, %d %b %Y %H:%M:%S GMT', os.time() + confs["web_apps"][current_context]["session_validity"])
+        end
+
         applet:add_header("Set-Cookie", set_cookie)
 
         applet:set_status(302)
