@@ -36,9 +36,9 @@
         },
         "/api" : {
             "home_page_uri": "/api",
-            "error_page_uri": "/error",
-            "callback_uri": "/callback",
-            "logout_uri": "/logout",
+            "error_page_uri": "/api/error",
+            "callback_uri": "/api/callback",
+            "logout_uri": "/api/logout",
             "scope": ["openid"]
         }
     },
