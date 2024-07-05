@@ -1,3 +1,7 @@
+-- SPDX-FileCopyrightText: 2024 CERN
+--
+-- SPDX-License-Identifier: Apache-2.0
+
 package.path = package.path .. ";/usr/share/lua/lua5.4/?.so" .. ";/usr/local/share/lua/5.4/?.lua"
 
 local utils = require("lua-scripts.utils")

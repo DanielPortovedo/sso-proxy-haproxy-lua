@@ -1,3 +1,7 @@
+-- SPDX-FileCopyrightText: 2024 CERN
+--
+-- SPDX-License-Identifier: Apache-2.0
+
 local constants = {}
 
 -- Providers

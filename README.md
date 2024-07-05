@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 CERN
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 # SSO Proxy - HAProxy + Lua
 
 - "[HAProxy](https://github.com/haproxy/haproxy/blob/master/README.md) is a free, very fast and reliable reverse-proxy offering high availability, load balancing, and proxying for TCP and HTTP-based applications"
