@@ -1,3 +1,7 @@
+-- SPDX-FileCopyrightText: 2024 CERN
+--
+-- SPDX-License-Identifier: Apache-2.0
+
 -- Follow this guide to create a app within google https://developers.google.com/identity/protocols/oauth2/web-server
 local log = require("lua-scripts.logs")
 local json = require("lunajson")

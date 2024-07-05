@@ -1,3 +1,7 @@
+-- SPDX-FileCopyrightText: 2024 CERN
+--
+-- SPDX-License-Identifier: Apache-2.0
+
 local error = require("lua-scripts.errors")
 local log = require("lua-scripts.logs")
 local url = require("socket.url")
