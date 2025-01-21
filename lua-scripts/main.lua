@@ -19,7 +19,6 @@ local confs = {
     ["web_apps"] = {}
 }
 
-local current_context = ""
 local contextsApplicationsPaths = {}
 
 local user_sessions = {}
@@ -96,7 +95,6 @@ local function validate_applications_configurations()
     end
 
     confs["web_apps"] = wa_confs
-    current_context = contextsApplicationsPaths[1]
 end
 
 local function validate_provider()
@@ -149,7 +147,7 @@ end
 local function extract_uris(txn)
     local current_path = txn.f:path()
 
-    current_context = utils.validate_if_context_path_exists(utils.get_array_of_possible_contexts(current_path), contextsApplicationsPaths)
+    local current_context = utils.validate_if_context_path_exists(utils.get_array_of_possible_contexts(current_path), contextsApplicationsPaths)
     if(current_context == "") then
         error.throwTxnError("Given context application path doesn't exist.", txn)
         return
@@ -173,9 +171,9 @@ local function is_public_path(txn)
 end
 
 local function callback(applet)
-    log.log_info("Callback request received", current_context)
+    local current_context = applet:get_var("txn.context")
 
-    current_context = applet:get_var("txn.context")
+    log.log_info("Callback request received", current_context)
 
     log.log_info("Extracting user session code", current_context)
     local extractedParams = utils.extract_parameters(applet.qs)
@@ -249,7 +247,7 @@ end
 ---Is called when receives a requests. 
 ---It will validate the session
 local function validate_cookie(txn)
-    current_context = txn:get_var("txn.context")
+    local current_context = txn:get_var("txn.context")
 
     -- Extract cookie
     local cookie_raw = txn.http:req_get_headers()["cookie"]
@@ -313,7 +311,7 @@ end
 ---Is called when receives a logout request.
 ---It will remove session from lua memory and redirect user to homePage.
 local function logout(applet)
-    current_context = applet:get_var("txn.context")
+    local current_context = applet:get_var("txn.context")
 
     -- Extract cookie
     local cookie_raw = applet.headers["cookie"]
@@ -373,7 +371,7 @@ end
 --- If context doesn't exist throws error.
 --- Creates a cookie to persist the current path of the user.
 local function auth_redirect(applet)
-    current_context = applet:get_var("txn.context")
+    local current_context = applet:get_var("txn.context")
 
     log.log_info("Detected user without authentication cookie", current_context)
 
@@ -404,7 +402,7 @@ local function need_authentication(txn)
     -- Least privilege rule (assume that always needs authentication)
     txn:set_var("txn.need_authentication", 1)
 
-    current_context = txn:get_var("txn.context")
+    local current_context = txn:get_var("txn.context")
 
     if(confs["web_apps"][current_context]["require_authentication"] == false) then
         txn:set_var("txn.need_authentication", 0)
@@ -412,7 +410,7 @@ local function need_authentication(txn)
 end
 
 local function remove_headers(txn)
-    current_context = txn:get_var("txn.context")
+    local current_context = txn:get_var("txn.context")
 
     -- Remove defined headers
     if current_context ~= nil then
@@ -425,7 +423,7 @@ end
 --- This function will retrieve the user information given the current request.
 --- It extracts the cookies and validates if the user session exists and it's valid
 local function extract_user_info_from_txn(txn)
-    current_context = txn:get_var("txn.context")
+    local current_context = txn:get_var("txn.context")
 
     if current_context == nil then
         error.throw_txn_error("Current context not found while extracting user_info", txn)

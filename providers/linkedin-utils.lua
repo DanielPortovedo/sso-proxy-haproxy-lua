@@ -94,23 +94,23 @@ function Linkedin.get_tokens(current_context, global, web_app, code)
 
     local url_token = conf["token_endpoint"]
     local headers = {
-        ['Content-Type'] = "application/x-www-form-urlencoded"
+        ['Content-Type'] = {"application/x-www-form-urlencoded"}
     }
 
     -- Perform the POST request
-    local response_body = {}
     log.log_info("Performing request to obtaining access token ...", current_context)
     log.log_request(url_token, "POST", current_context)
 
-    local response, response_code, response_headers, response_status = http.request {
+    local httpclient = core.httpclient()
+
+    local response = httpclient:post{
         url = url_token,
-        method = "POST",
         headers = headers,
-        source = ltn12.source.string(utils.build_parameters(params)),
-        sink = ltn12.sink.table(response_body)
+        body = utils.buildParameters(params),
+        timeout = 10000
     }
 
-    return response_code, response_body
+    return response.code, response.body
 end
 
 function Linkedin.populate_session(session_validity, confs_provider, json_body, confs_webapp, current_context)
